@@ -1,0 +1,53 @@
+name: CI
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main, develop]
+
+jobs:
+  quality:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 9
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "pnpm"
+
+      - name: Check for workspace packages
+        id: check-workspaces
+        run: |
+          if [ -f pnpm-workspace.yaml ] && (ls apps/*/package.json packages/*/package.json 2>/dev/null | head -1); then
+            echo "has_workspaces=true" >> $GITHUB_OUTPUT
+          else
+            echo "has_workspaces=false" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Install dependencies
+        if: steps.check-workspaces.outputs.has_workspaces == 'true'
+        run: pnpm install --frozen-lockfile
+
+      - name: Lint
+        if: steps.check-workspaces.outputs.has_workspaces == 'true'
+        run: pnpm -r run lint --if-present
+
+      - name: Typecheck
+        if: steps.check-workspaces.outputs.has_workspaces == 'true'
+        run: pnpm -r run typecheck --if-present
+
+      - name: Test
+        if: steps.check-workspaces.outputs.has_workspaces == 'true'
+        run: pnpm -r run test --if-present
+
+      - name: No workspaces yet — succeed
+        if: steps.check-workspaces.outputs.has_workspaces != 'true'
+        run: echo "No workspace package.json found; skipping lint/typecheck/test. Add packages to enable."

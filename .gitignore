@@ -1,0 +1,44 @@
+# Dependencies
+node_modules/
+.pnpm-store/
+
+# Build outputs
+dist/
+build/
+.next/
+out/
+
+# Prisma
+prisma/migrations/**/migration_lock.toml
+
+# Environment & secrets
+.env
+.env.*
+!.env.example
+
+# Logs & runtime
+logs/
+*.log
+npm-debug.log*
+pnpm-debug.log*
+
+# OS
+.DS_Store
+Thumbs.db
+
+# IDE
+.idea/
+.vscode/*
+!.vscode/settings.json
+!.vscode/extensions.json
+
+# Testing
+coverage/
+.nyc_output/
+
+# Docker
+.docker/
+
+# Misc
+*.tsbuildinfo
+.turbo/

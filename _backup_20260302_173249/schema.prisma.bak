@@ -1,0 +1,116 @@
+// https://prisma.io/docs/reference/api-reference/prisma-schema-reference
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url = "file:./dev.db"
+}
+
+enum Role {
+  ORG_OWNER
+  ADMIN
+  PM
+  FOREMAN
+  WORKER
+  SUBCONTRACTOR
+  CLIENT_VIEWER
+}
+
+model User {
+  id            String    @id @default(cuid())
+  email         String    @unique
+  passwordHash  String    @map("password_hash")
+  name          String?
+  createdAt     DateTime  @default(now()) @map("created_at")
+  updatedAt    DateTime  @updatedAt @map("updated_at")
+
+  memberships   Membership[]
+  refreshTokens RefreshToken[]
+  auditLogs     AuditLog[]     @relation("AuditLogUser")
+  organizationsCreated Organization[] @relation("OrgCreatedBy")
+  jsaDocuments  JsaDocument[]  @relation("JsaCreatedBy")
+}
+
+model Organization {
+  id              String   @id @default(cuid())
+  name            String
+  slug            String   @unique
+  createdAt       DateTime @default(now()) @map("created_at")
+  updatedAt      DateTime @updatedAt @map("updated_at")
+  createdByUserId String?  @map("created_by_user_id")
+
+  createdByUser User?       @relation("OrgCreatedBy", fields: [createdByUserId], references: [id], onDelete: SetNull)
+  memberships   Membership[]
+  auditLogs     AuditLog[]
+  jsaDocuments  JsaDocument[]
+}
+
+model JsaDocument {
+  id           String   @id @default(cuid())
+  organizationId String  @map("organization_id")
+  createdById   String  @map("created_by_id")
+  task         String
+  location     String?
+  toolsJson    String   @map("tools_json")   // JSON array as string for SQLite
+  hazardsJson  String   @map("hazards_json") // JSON array as string
+  resultJson   String   @map("result_json")   // full AI result JSON
+  createdAt    DateTime @default(now()) @map("created_at")
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  createdBy    User         @relation("JsaCreatedBy", fields: [createdById], references: [id], onDelete: Cascade)
+
+  @@index([organizationId])
+  @@index([createdById])
+  @@index([createdAt])
+}
+
+model Membership {
+  id             String   @id @default(cuid())
+  organizationId String   @map("organization_id")
+  userId         String   @map("user_id")
+  role           Role
+  createdAt      DateTime @default(now()) @map("created_at")
+  updatedAt      DateTime @updatedAt @map("updated_at")
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  user         User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([organizationId, userId])
+  @@index([userId])
+  @@index([organizationId])
+}
+
+model RefreshToken {
+  id        String   @id @default(cuid())
+  userId    String   @map("user_id")
+  tokenHash String   @map("token_hash")
+  expiresAt DateTime @map("expires_at")
+  createdAt DateTime @default(now()) @map("created_at")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([tokenHash])
+  @@index([userId])
+}
+
+model AuditLog {
+  id             String   @id @default(cuid())
+  organizationId String?  @map("organization_id")
+  projectId      String?  @map("project_id")
+  userId         String?  @map("user_id")
+  action         String
+  resourceType   String   @map("resource_type")
+  resourceId     String?  @map("resource_id")
+  payload        Json?
+  createdAt      DateTime @default(now()) @map("created_at")
+
+  organization Organization? @relation(fields: [organizationId], references: [id], onDelete: SetNull)
+  user         User?         @relation("AuditLogUser", fields: [userId], references: [id], onDelete: SetNull)
+
+  @@index([organizationId])
+  @@index([userId])
+  @@index([createdAt])
+}
+

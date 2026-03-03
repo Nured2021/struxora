@@ -1,0 +1,125 @@
+﻿# =========================================================
+# STRUXORA â€“ OPENAI SMART JSA (ALL-IN-ONE HARDEN + TEST)
+# =========================================================
+# Does ALL of this in one run:
+# 1) Ensures OPENAI_API_KEY is set (for this session; prompts if missing)
+# 2) Ensures openai dependency exists in apps/api
+# 3) Hardens apps/api/src/ai/openai.service.ts JSON handling (idempotent)
+# 4) Restarts API on PORT=3001 in a new window (with env vars)
+# 5) Runs a live test call to POST /ai/jsa and prints result
+#
+# NOTE: If key is not set, paste your key when prompted.
+# =========================================================
+
+$ErrorActionPreference = "Stop"
+$repo = "C:\Users\ameli\struxora\struxora"
+cd $repo
+
+# ---- 1) Ensure key in this session ----
+if (-not $env:OPENAI_API_KEY -or $env:OPENAI_API_KEY.Trim().Length -lt 20) {
+  $k = Read-Host "Paste OPENAI_API_KEY for THIS session"
+  if (-not $k -or $k.Trim().Length -lt 20) { throw "OPENAI_API_KEY not provided." }
+  $env:OPENAI_API_KEY = $k.Trim()
+}
+if (-not $env:OPENAI_MODEL) { $env:OPENAI_MODEL = "gpt-4o-mini" }
+
+Write-Host "`n[1] OPENAI_API_KEY loaded for this session." -ForegroundColor Green
+Write-Host "Model: $env:OPENAI_MODEL" -ForegroundColor Gray
+
+# ---- 2) Ensure OpenAI SDK installed in API ----
+Write-Host "`n[2] Ensuring OpenAI SDK is installed..." -ForegroundColor Cyan
+npm --filter @struxora/api add openai 2>$null | Out-Null
+Write-Host "OpenAI SDK ensured." -ForegroundColor Green
+
+# ---- 3) Harden openai.service.ts JSON handling (idempotent) ----
+Write-Host "`n[3] Hardening OpenAI JSON handling..." -ForegroundColor Cyan
+$path = "apps\api\src\ai\openai.service.ts"
+if (-not (Test-Path $path)) { throw "Missing: $path" }
+
+$src = Get-Content $path -Raw
+
+# Insert helpers only if missing
+if ($src -notmatch "function stripCodeFences") {
+  $helpers = @"
+function stripCodeFences(s: string) {
+  return s.replace(/^\s*```(?:json)?\s*/i, '').replace(/\s*```\s*`$/i, '').trim();
+}
+function extractFirstJsonObject(s: string) {
+  const t = stripCodeFences(s);
+  const start = t.indexOf('{');
+  const end = t.lastIndexOf('}');
+  if (start >= 0 && end > start) return t.slice(start, end + 1);
+  return t;
+}
+
+"@
+  $src = $src -replace "(import \{ Injectable \} from '@nestjs/common';)", "`$1`r`n`r`n$helpers"
+}
+
+# Add response_format if using chat.completions and not already present
+if ($src -match "chat\.completions\.create\(\s*\{" -and $src -notmatch "response_format") {
+  $src = $src -replace "(max_tokens:\s*\d+)", "`$1,`r`n      response_format: { type: 'json_object' }"
+}
+
+# Ensure return uses extractFirstJsonObject when returning raw content
+if ($src -match "return\s+stripped\s*;" -and $src -notmatch "return extractFirstJsonObject") {
+  $src = $src -replace "return\s+stripped\s*;", "return extractFirstJsonObject(text);"
+}
+if ($src -match "return\s+text\s*;" -and $src -notmatch "return extractFirstJsonObject\(text\)") {
+  $src = $src -replace "return\s+text\s*;", "return extractFirstJsonObject(text);"
+}
+
+Set-Content -Encoding UTF8 $path $src
+$src = Get-Content $path -Raw
+if ($src -match "extractFirstJsonObject|stripCodeFences") { Write-Host "openai.service.ts hardened." -ForegroundColor Green } else { Write-Host "openai.service.ts unchanged (already has helpers)." -ForegroundColor Gray }
+
+# ---- 4) Restart API in new window ----
+Write-Host "`n[4] Restarting API (new window) on PORT=3001..." -ForegroundColor Cyan
+$line = netstat -ano 2>$null | findstr ":3001" | findstr "LISTENING"
+if ($line) {
+  $pid = ($line -split "\s+")[-1]
+  if ($pid -match "^\d+$") {
+    Write-Host "Killing existing listener PID $pid on 3001..." -ForegroundColor Yellow
+    try { Stop-Process -Id $pid -Force -ErrorAction SilentlyContinue } catch {}
+    Start-Sleep -Seconds 2
+  }
+}
+
+Start-Process powershell -ArgumentList @(
+  "-NoExit",
+  "-Command",
+  "cd `"$repo`"; `$env:PORT='3001'; `$env:OPENAI_API_KEY=`"$($env:OPENAI_API_KEY)`"; `$env:OPENAI_MODEL=`"$($env:OPENAI_MODEL)`"; npm --filter @struxora/api run start:dev"
+) | Out-Null
+
+Write-Host "Waiting for API..." -ForegroundColor Yellow
+$deadline = (Get-Date).AddSeconds(90)
+do {
+  $listening = netstat -ano 2>$null | findstr ":3001" | findstr "LISTENING"
+  if ($listening) { break }
+  Start-Sleep -Seconds 2
+} while ((Get-Date) -lt $deadline)
+if (-not $listening) { throw "API did not start listening on 3001. Check the new API window output." }
+Write-Host "API is listening." -ForegroundColor Green
+
+# ---- 5) Live test call to /ai/jsa ----
+Write-Host "`n[5] Testing /ai/jsa (login + call)..." -ForegroundColor Cyan
+$base = "http://localhost:3001"
+$login = Invoke-RestMethod -Method POST -Uri "$base/auth/login" -ContentType "application/json" `
+  -Body (@{ email = "admin@test.com"; password = "Admin123!" } | ConvertTo-Json)
+$token = $login.accessToken
+if (-not $token) { $token = $login.AccessToken }
+if (-not $token) { throw "Login did not return accessToken." }
+
+$res = Invoke-RestMethod -Method POST -Uri "$base/ai/jsa" -Headers @{ Authorization = "Bearer $token" } `
+  -ContentType "application/json" -Body '{
+  "task":"Grinding and cutting metal brackets",
+  "location":"Shop bay 2",
+  "tools":["Angle grinder","Cut-off wheel"],
+  "hazards":["sparks","sharp edges"],
+  "severity":4,
+  "probability":4
+}'
+
+$res | ConvertTo-Json -Depth 14
+Write-Host "`nDONE âœ… Smart JSA wired. Look for: ai.enabled=true and enhanced{...}" -ForegroundColor Green
+

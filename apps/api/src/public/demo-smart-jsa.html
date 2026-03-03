@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>STRUXORA Smart JSA Demo</title>
+  <style>
+    * { box-sizing: border-box; }
+    body { font-family: system-ui, sans-serif; max-width: 900px; margin: 2rem auto; padding: 0 1rem; }
+    h1 { color: #1a365d; }
+    .card { background: #f7fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 1.5rem; margin: 1rem 0; }
+    button { background: #3182ce; color: white; border: none; padding: 0.6rem 1.2rem; border-radius: 6px; cursor: pointer; font-size: 1rem; }
+    button:hover { background: #2c5282; }
+    button:disabled { opacity: 0.6; cursor: not-allowed; }
+    input { padding: 0.5rem; border: 1px solid #cbd5e0; border-radius: 4px; width: 100%; max-width: 300px; }
+    label { display: block; margin-top: 0.5rem; font-weight: 500; }
+    pre { background: #2d3748; color: #e2e8f0; padding: 1rem; border-radius: 6px; overflow-x: auto; font-size: 0.875rem; }
+    .success { color: #38a169; }
+    .error { color: #e53e3e; }
+    .status { margin: 0.5rem 0; }
+  </style>
+</head>
+<body>
+  <h1>STRUXORA Smart JSA Demo</h1>
+  <p>Proof: <strong>AUTH → AI → CLEAN JSON OUTPUT</strong></p>
+
+  <div class="card">
+    <h2>1) Login</h2>
+    <label>Email</label>
+    <input id="email" type="email" value="admin@test.com" placeholder="admin@test.com">
+    <label>Password</label>
+    <input id="password" type="password" value="Admin123!" placeholder="Admin123!">
+  </div>
+
+  <div class="card">
+    <h2>2) Run Smart JSA</h2>
+    <button id="run" onclick="runSmartJsa()">Run Smart JSA</button>
+    <div id="status" class="status"></div>
+  </div>
+
+  <div class="card">
+    <h2>3) Result (JSON)</h2>
+    <pre id="output">Click "Run Smart JSA" to see the result.</pre>
+  </div>
+
+  <script>
+    const API = window.location.origin;
+
+    async function runSmartJsa() {
+      const email = document.getElementById('email').value.trim();
+      const password = document.getElementById('password').value;
+      const status = document.getElementById('status');
+      const output = document.getElementById('output');
+      const btn = document.getElementById('run');
+
+      btn.disabled = true;
+      status.textContent = 'Logging in...';
+      status.className = 'status';
+
+      try {
+        // 1) Login
+        const loginRes = await fetch(API + '/auth/login', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email, password }),
+        });
+        if (!loginRes.ok) throw new Error('Login failed: ' + (await loginRes.text()));
+        const login = await loginRes.json();
+        const token = login.accessToken || login.AccessToken;
+        if (!token) throw new Error('No token in login response');
+
+        status.textContent = 'Calling Smart JSA...';
+
+        // 2) Smart JSA
+        const jsaRes = await fetch(API + '/ai/jsa', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': 'Bearer ' + token,
+          },
+          body: JSON.stringify({
+            task: 'Grinding and cutting metal brackets',
+            location: 'Shop bay 2',
+            tools: ['Angle grinder', 'Cut-off wheel'],
+            hazards: ['sparks', 'sharp edges'],
+            severity: 4,
+            probability: 4,
+          }),
+        });
+        if (!jsaRes.ok) throw new Error('JSA failed: ' + (await jsaRes.text()));
+        const result = await jsaRes.json();
+
+        // 3) Display
+        status.textContent = 'Done ✓ (Look for ai.enabled and enhanced)';
+        status.className = 'status success';
+        output.textContent = JSON.stringify(result, null, 2);
+      } catch (e) {
+        status.textContent = 'Error: ' + e.message;
+        status.className = 'status error';
+        output.textContent = 'Error: ' + e.message;
+      } finally {
+        btn.disabled = false;
+      }
+    }
+  </script>
+</body>
+</html>
