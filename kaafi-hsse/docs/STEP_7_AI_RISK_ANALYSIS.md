@@ -34,14 +34,14 @@ http://localhost:11434/api/generate
 {
   "hazards": [],
   "risks": [],
-  "controls": [],
-  "raw_response": "DeepSeek response text"
+  "controls": []
 }
 ```
 
 ## Boundaries
 
 - DeepSeek R1 only.
+- One connector.
+- One endpoint.
 - No extra AI architecture.
-- No Gemma, Mistral, or Phi-3 connection.
 - Existing modules are not changed.

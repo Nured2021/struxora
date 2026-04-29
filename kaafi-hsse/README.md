@@ -8,7 +8,7 @@ Fresh MVP project for a practical HSSE platform focused on industrial safety wor
 2. Risk Assessment
 3. Permit to Work (PTW)
 4. Simple Dashboard
-5. Basic AI Safety Assistant (rule-based first)
+5. Basic AI Safety Assistant (DeepSeek R1 through local Ollama)
 
 ## Development Order
 
@@ -18,7 +18,7 @@ Fresh MVP project for a practical HSSE platform focused on industrial safety wor
 4. Add risk assessment
 5. Add permit to work
 6. Add dashboard
-7. Add rule-based AI assistant
+7. Add simple DeepSeek R1 risk analysis endpoint
 
 ## Project Structure
 
@@ -44,7 +44,7 @@ kaafi-hsse/
 
 - Step 1: clean project structure initialized.
 - Step 2: simple backend authentication initialized with Express, PostgreSQL, and JWT.
-- Step 3: JSA create/list/get API added; AI model placeholders added for future use only.
+- Step 3: JSA create/list/get API added.
 - Step 4: Risk Assessment create/list/get API added and linked to JSA.
 - Step 5: Permit to Work create/list/get API added and linked to JSA plus Risk Assessment.
 - Step 6: simple dashboard summary API added for counts and latest records.

@@ -1,6 +1,6 @@
-# Step 3 - JSA Module and AI Structure
+# Step 3 - JSA Module
 
-This step adds JSA CRUD endpoints and placeholder AI model structure only.
+This step adds JSA CRUD endpoints only.
 
 ## Included JSA endpoints
 
@@ -26,21 +26,9 @@ CREATE TABLE jsa_documents (
 );
 ```
 
-## AI structure
-
-Created placeholder-only files:
-
-- `backend/ai/ai.service.js`
-- `backend/ai/models/deepseek.model.js`
-- `backend/ai/models/mistral.model.js`
-- `backend/ai/models/gemma.model.js`
-- `backend/ai/models/phi3.model.js`
-
 ## Boundaries
 
 - No AI logic is implemented.
-- No AI model is called.
-- No AI libraries are installed.
 - No Risk Assessment module.
 - No PTW module.
 - No Dashboard module.
