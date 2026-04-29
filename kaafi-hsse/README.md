@@ -49,5 +49,6 @@ kaafi-hsse/
 - Step 5: Permit to Work create/list/get API added and linked to JSA plus Risk Assessment.
 - Step 6: simple dashboard summary API added for counts and latest records.
 - Step 7: simple DeepSeek R1 via Ollama risk analysis endpoint added.
+- Step 8: simple Next.js frontend added for login, dashboard, JSA, Risk, PTW, and AI pages.
 
 No legacy modules are reused.
