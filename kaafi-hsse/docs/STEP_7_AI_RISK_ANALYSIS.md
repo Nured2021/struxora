@@ -17,7 +17,7 @@ The endpoint requires a JWT bearer token.
 ```json
 {
   "model": "deepseek-r1:7b",
-  "prompt": "Analyze this hazard and return risks and controls: <text>",
+  "prompt": "Analyze the following hazard and respond ONLY in JSON format with keys: hazards, risks, controls. No explanation. Hazard: <text>",
   "stream": false
 }
 ```
@@ -35,6 +35,16 @@ http://localhost:11434/api/generate
   "hazards": [],
   "risks": [],
   "controls": []
+}
+```
+
+If the AI response cannot be parsed as JSON, the connector returns:
+
+```json
+{
+  "hazards": [],
+  "risks": [],
+  "controls": ["Unable to parse AI response"]
 }
 ```
 

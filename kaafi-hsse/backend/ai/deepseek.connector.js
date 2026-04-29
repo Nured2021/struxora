@@ -1,28 +1,50 @@
 const OLLAMA_GENERATE_URL = 'http://localhost:11434/api/generate';
 const MODEL_NAME = 'deepseek-r1:7b';
+const PARSE_FALLBACK = {
+  hazards: [],
+  risks: [],
+  controls: ['Unable to parse AI response'],
+};
 
-function extractSection(text, sectionName) {
-  const pattern = new RegExp(`${sectionName}\\s*:?\\s*([\\s\\S]*?)(?=\\n\\s*(hazards|risks|controls)\\s*:?|$)`, 'i');
-  const match = text.match(pattern);
+function toStringArray(value) {
+  if (!Array.isArray(value)) return [];
 
-  if (!match) return [];
-
-  return match[1]
-    .split('\n')
-    .map((line) => line.replace(/^[-*•\d.)\s]+/, '').trim())
+  return value
+    .map((item) => String(item).trim())
     .filter(Boolean);
 }
 
-function parseAnalysis(text, originalText) {
-  const hazards = extractSection(text, 'hazards');
-  const risks = extractSection(text, 'risks');
-  const controls = extractSection(text, 'controls');
+function extractJson(text) {
+  const trimmed = String(text || '')
+    .replace(/^\s*```(?:json)?\s*/i, '')
+    .replace(/\s*```\s*$/i, '')
+    .trim();
+  const start = trimmed.indexOf('{');
+  const end = trimmed.lastIndexOf('}');
 
-  return {
-    hazards: hazards.length ? hazards : [originalText],
-    risks: risks.length ? risks : [text],
-    controls,
-  };
+  if (start === -1 || end === -1 || end <= start) {
+    throw new Error('No JSON object found');
+  }
+
+  return trimmed.slice(start, end + 1);
+}
+
+function parseAnalysis(text) {
+  try {
+    const parsed = JSON.parse(extractJson(text));
+
+    return {
+      hazards: toStringArray(parsed.hazards),
+      risks: toStringArray(parsed.risks),
+      controls: toStringArray(parsed.controls),
+    };
+  } catch (_error) {
+    return { ...PARSE_FALLBACK };
+  }
+}
+
+function buildPrompt(input) {
+  return `Analyze the following hazard and respond ONLY in JSON format with keys: hazards, risks, controls. No explanation. Hazard: ${input}`;
 }
 
 async function analyzeRisk(text) {
@@ -40,7 +62,7 @@ async function analyzeRisk(text) {
     },
     body: JSON.stringify({
       model: MODEL_NAME,
-      prompt: `Analyze this hazard and return risks and controls: ${input}`,
+      prompt: buildPrompt(input),
       stream: false,
     }),
   });
@@ -60,9 +82,7 @@ async function analyzeRisk(text) {
     throw error;
   }
 
-  return {
-    ...parseAnalysis(generatedText, input),
-  };
+  return parseAnalysis(generatedText);
 }
 
 module.exports = {
