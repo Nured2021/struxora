@@ -51,4 +51,8 @@ kaafi-hsse/
 - Step 7: simple DeepSeek R1 via Ollama risk analysis endpoint added.
 - Step 8: simple Next.js frontend added for login, dashboard, JSA, Risk, PTW, and AI pages.
 
+## Architecture Lock
+
+KAAFI is locked to a simple MVP architecture. See `docs/MVP_LOCK.md`.
+
 No legacy modules are reused.
