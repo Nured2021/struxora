@@ -42,4 +42,7 @@ kaafi-hsse/
 
 ## Current Status
 
-Step 1 only: clean project structure initialized. No legacy modules are reused.
+- Step 1: clean project structure initialized.
+- Step 2: simple backend authentication initialized with Express, PostgreSQL, and JWT.
+
+No legacy modules are reused.
