@@ -132,3 +132,37 @@ Requires `Authorization: Bearer <token>`.
 ```http
 GET /risk/1
 ```
+
+### Create Permit to Work
+
+Requires `Authorization: Bearer <token>`.
+
+```http
+POST /ptw
+Content-Type: application/json
+
+{
+  "jsa_id": 1,
+  "risk_id": 1,
+  "permit_type": "hot_work",
+  "description": "Hot work permit for welding activity",
+  "start_time": "2026-04-29T08:00:00Z",
+  "end_time": "2026-04-29T16:00:00Z"
+}
+```
+
+### List Permits to Work
+
+Requires `Authorization: Bearer <token>`.
+
+```http
+GET /ptw
+```
+
+### Get Permit to Work
+
+Requires `Authorization: Bearer <token>`.
+
+```http
+GET /ptw/1
+```

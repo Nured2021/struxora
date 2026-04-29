@@ -46,5 +46,6 @@ kaafi-hsse/
 - Step 2: simple backend authentication initialized with Express, PostgreSQL, and JWT.
 - Step 3: JSA create/list/get API added; AI model placeholders added for future use only.
 - Step 4: Risk Assessment create/list/get API added and linked to JSA.
+- Step 5: Permit to Work create/list/get API added and linked to JSA plus Risk Assessment.
 
 No legacy modules are reused.

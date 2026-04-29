@@ -26,3 +26,16 @@ CREATE TABLE IF NOT EXISTS risk_assessments (
   created_by INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
   created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
+
+CREATE TABLE IF NOT EXISTS ptw_permits (
+  id SERIAL PRIMARY KEY,
+  jsa_id INTEGER NOT NULL REFERENCES jsa_documents(id) ON DELETE CASCADE,
+  risk_id INTEGER NOT NULL REFERENCES risk_assessments(id) ON DELETE CASCADE,
+  permit_type VARCHAR(50) NOT NULL,
+  description TEXT NOT NULL,
+  start_time TIMESTAMPTZ NOT NULL,
+  end_time TIMESTAMPTZ NOT NULL,
+  status VARCHAR(20) NOT NULL DEFAULT 'pending' CHECK (status IN ('pending', 'approved', 'rejected')),
+  created_by INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
