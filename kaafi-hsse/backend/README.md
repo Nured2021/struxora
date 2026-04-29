@@ -187,3 +187,18 @@ Returns:
   "recent_ptw": []
 }
 ```
+
+### AI Risk Analysis
+
+Requires `Authorization: Bearer <token>`.
+
+```http
+POST /ai/risk-analysis
+Content-Type: application/json
+
+{
+  "text": "working at height without harness"
+}
+```
+
+Uses local Ollama with `deepseek-r1:7b`.

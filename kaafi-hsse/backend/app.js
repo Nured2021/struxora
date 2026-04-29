@@ -7,6 +7,7 @@ const jsaRoutes = require('./routes/jsa.routes');
 const riskRoutes = require('./routes/risk.routes');
 const ptwRoutes = require('./routes/ptw.routes');
 const dashboardRoutes = require('./routes/dashboard.routes');
+const aiRoutes = require('./routes/ai.routes');
 const { createUsersTable } = require('./models/user.model');
 const { createJsaDocumentsTable } = require('./models/jsa.model');
 const { createRiskAssessmentsTable } = require('./models/risk.model');
@@ -27,6 +28,7 @@ app.use('/jsa', jsaRoutes);
 app.use('/risk', riskRoutes);
 app.use('/ptw', ptwRoutes);
 app.use('/dashboard', dashboardRoutes);
+app.use('/ai', aiRoutes);
 
 app.use((err, _req, res, _next) => {
   const status = err.statusCode || err.status || 500;
