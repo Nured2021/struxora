@@ -28,6 +28,6 @@ kaafi-hsse/
 
 ## Boundaries
 
-- No existing Struxora or SAFE WAY code is imported.
+- No legacy code is imported.
 - No business modules are implemented in Step 1.
 - Step 2 starts simple authentication inside this isolated project.

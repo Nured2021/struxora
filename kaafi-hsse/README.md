@@ -47,5 +47,6 @@ kaafi-hsse/
 - Step 3: JSA create/list/get API added; AI model placeholders added for future use only.
 - Step 4: Risk Assessment create/list/get API added and linked to JSA.
 - Step 5: Permit to Work create/list/get API added and linked to JSA plus Risk Assessment.
+- Step 6: simple dashboard summary API added for counts and latest records.
 
 No legacy modules are reused.

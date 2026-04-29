@@ -166,3 +166,24 @@ Requires `Authorization: Bearer <token>`.
 ```http
 GET /ptw/1
 ```
+
+### Dashboard Summary
+
+Requires `Authorization: Bearer <token>`.
+
+```http
+GET /dashboard
+```
+
+Returns:
+
+```json
+{
+  "total_jsa": 0,
+  "total_risks": 0,
+  "total_ptw": 0,
+  "recent_jsa": [],
+  "recent_risks": [],
+  "recent_ptw": []
+}
+```
