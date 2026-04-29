@@ -3,7 +3,9 @@ const cors = require('cors');
 require('dotenv').config();
 
 const authRoutes = require('./routes/auth.routes');
+const jsaRoutes = require('./routes/jsa.routes');
 const { createUsersTable } = require('./models/user.model');
+const { createJsaDocumentsTable } = require('./models/jsa.model');
 
 const app = express();
 const port = Number(process.env.PORT || 4000);
@@ -16,6 +18,7 @@ app.get('/health', (_req, res) => {
 });
 
 app.use('/auth', authRoutes);
+app.use('/jsa', jsaRoutes);
 
 app.use((err, _req, res, _next) => {
   const status = err.statusCode || err.status || 500;
@@ -26,6 +29,7 @@ app.use((err, _req, res, _next) => {
 
 async function start() {
   await createUsersTable();
+  await createJsaDocumentsTable();
   app.listen(port, () => {
     console.log(`KAAFI HSSE backend running on port ${port}`);
   });

@@ -2,13 +2,15 @@
 
 Node.js + Express backend for the KAAFI HSSE MVP.
 
-## Step 2 Scope
+## Current Scope
 
 - Simple user authentication.
 - JWT-based session handling.
 - Roles: Admin, Supervisor, Worker.
+- JSA create/list/get endpoints.
+- AI model placeholder structure only.
 
-No JSA, PTW, Risk, Dashboard, or AI modules are implemented in this step.
+No PTW, Risk, Dashboard, or AI logic is implemented yet.
 
 ## Setup
 
@@ -26,7 +28,7 @@ No JSA, PTW, Risk, Dashboard, or AI modules are implemented in this step.
    cp .env.example .env
    ```
 
-4. Create the users table:
+4. Create the database tables:
 
    ```sh
    psql "$DATABASE_URL" -f schema.sql
@@ -66,3 +68,35 @@ Content-Type: application/json
 ```
 
 Both endpoints return a JWT token on success.
+
+### Create JSA
+
+Requires `Authorization: Bearer <token>`.
+
+```http
+POST /jsa
+Content-Type: application/json
+
+{
+  "title": "Install scaffold",
+  "description": "Prepare area and install scaffold sections",
+  "location": "Plant A",
+  "status": "draft"
+}
+```
+
+### List JSA documents
+
+Requires `Authorization: Bearer <token>`.
+
+```http
+GET /jsa
+```
+
+### Get JSA document
+
+Requires `Authorization: Bearer <token>`.
+
+```http
+GET /jsa/1
+```

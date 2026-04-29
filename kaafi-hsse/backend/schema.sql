@@ -5,3 +5,13 @@ CREATE TABLE IF NOT EXISTS users (
   role VARCHAR(20) NOT NULL CHECK (role IN ('Admin', 'Supervisor', 'Worker')),
   created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
+
+CREATE TABLE IF NOT EXISTS jsa_documents (
+  id SERIAL PRIMARY KEY,
+  title VARCHAR(255) NOT NULL,
+  description TEXT NOT NULL,
+  location VARCHAR(255),
+  created_by INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  status VARCHAR(20) NOT NULL DEFAULT 'draft' CHECK (status IN ('draft', 'approved')),
+  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);

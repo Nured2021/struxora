@@ -44,5 +44,6 @@ kaafi-hsse/
 
 - Step 1: clean project structure initialized.
 - Step 2: simple backend authentication initialized with Express, PostgreSQL, and JWT.
+- Step 3: JSA create/list/get API added; AI model placeholders added for future use only.
 
 No legacy modules are reused.
