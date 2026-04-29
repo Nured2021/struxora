@@ -100,3 +100,35 @@ Requires `Authorization: Bearer <token>`.
 ```http
 GET /jsa/1
 ```
+
+### Create Risk Assessment
+
+Requires `Authorization: Bearer <token>`.
+
+```http
+POST /risk
+Content-Type: application/json
+
+{
+  "jsa_id": 1,
+  "hazard": "Working at height",
+  "likelihood": 3,
+  "severity": 5
+}
+```
+
+### List Risk Assessments
+
+Requires `Authorization: Bearer <token>`.
+
+```http
+GET /risk
+```
+
+### Get Risk Assessment
+
+Requires `Authorization: Bearer <token>`.
+
+```http
+GET /risk/1
+```
