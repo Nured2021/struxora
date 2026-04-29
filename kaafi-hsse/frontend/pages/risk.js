@@ -63,9 +63,22 @@ export default function RiskPage() {
             <h2 className="font-semibold text-slate-900">Calculated Risk</h2>
             <p className="mt-2 text-slate-700">Risk Score: {createdRisk.risk_score}</p>
             <p className="text-slate-700">Hazard: {createdRisk.hazard}</p>
+            <RiskList title="AI Risks" items={createdRisk.risks} />
+            <RiskList title="AI Controls" items={createdRisk.controls} />
           </section>
         )}
       </section>
     </main>
+  );
+}
+
+function RiskList({ title, items = [] }) {
+  return (
+    <div className="mt-4">
+      <h3 className="text-sm font-semibold text-slate-900">{title}</h3>
+      <ul className="mt-2 list-disc space-y-1 pl-5 text-sm text-slate-700">
+        {items.length ? items.map((item, index) => <li key={`${title}-${index}`}>{item}</li>) : <li>No items returned.</li>}
+      </ul>
+    </div>
   );
 }

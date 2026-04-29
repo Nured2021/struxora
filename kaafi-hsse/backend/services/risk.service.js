@@ -1,5 +1,6 @@
 const Jsa = require('../models/jsa.model');
 const Risk = require('../models/risk.model');
+const deepseek = require('../ai/deepseek.connector');
 
 function validateScore(name, value) {
   const numberValue = Number(value);
@@ -23,7 +24,31 @@ function validateHazard(hazard) {
   return String(hazard).trim();
 }
 
-async function createRisk(userId, { jsa_id, jsaId, hazard, likelihood, severity }) {
+function normalizeStringArray(value) {
+  if (!Array.isArray(value)) return [];
+
+  return value
+    .map((item) => String(item).trim())
+    .filter(Boolean);
+}
+
+async function getAiRiskDetails(hazard) {
+  try {
+    const result = await deepseek.analyzeRisk(hazard);
+
+    return {
+      risks: normalizeStringArray(result.risks),
+      controls: normalizeStringArray(result.controls),
+    };
+  } catch (_error) {
+    return {
+      risks: [],
+      controls: [],
+    };
+  }
+}
+
+async function createRisk(userId, { jsa_id, jsaId, hazard, risks, controls, likelihood, severity }) {
   const linkedJsaId = Number(jsa_id || jsaId);
 
   if (!Number.isInteger(linkedJsaId) || linkedJsaId < 1) {
@@ -43,10 +68,20 @@ async function createRisk(userId, { jsa_id, jsaId, hazard, likelihood, severity 
   const cleanLikelihood = validateScore('Likelihood', likelihood);
   const cleanSeverity = validateScore('Severity', severity);
   const riskScore = cleanLikelihood * cleanSeverity;
+  let cleanRisks = normalizeStringArray(risks);
+  let cleanControls = normalizeStringArray(controls);
+
+  if (cleanRisks.length === 0 && cleanControls.length === 0) {
+    const aiDetails = await getAiRiskDetails(cleanHazard);
+    cleanRisks = aiDetails.risks;
+    cleanControls = aiDetails.controls;
+  }
 
   return Risk.createRiskAssessment({
     jsaId: linkedJsaId,
     hazard: cleanHazard,
+    risks: cleanRisks,
+    controls: cleanControls,
     likelihood: cleanLikelihood,
     severity: cleanSeverity,
     riskScore,

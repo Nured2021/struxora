@@ -52,6 +52,6 @@ If the AI response cannot be parsed as JSON, the connector returns:
 
 - DeepSeek R1 only.
 - One connector.
-- One endpoint.
+- One endpoint plus simple reuse by Risk creation.
 - No extra AI architecture.
-- Existing modules are not changed.
+- AI failure falls back immediately.

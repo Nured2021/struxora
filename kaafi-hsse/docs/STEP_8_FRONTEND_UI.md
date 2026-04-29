@@ -7,7 +7,7 @@ This step adds a simple Next.js + Tailwind CSS UI for the KAAFI MVP.
 - `/login` - login form, calls `POST /auth/login`, stores JWT in `localStorage`.
 - `/dashboard` - calls `GET /dashboard`, shows total JSA, Risk, and PTW counts.
 - `/jsa` - creates JSA documents and lists existing JSA documents.
-- `/risk` - creates Risk Assessments and shows the calculated `risk_score`.
+- `/risk` - creates Risk Assessments and shows the calculated `risk_score`, risks, and controls.
 - `/ptw` - creates PTW permits and lists existing permits.
 - `/ai` - calls `POST /ai/risk-analysis` and displays hazards, risks, and controls.
 
