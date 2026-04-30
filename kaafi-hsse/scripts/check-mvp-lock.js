@@ -14,6 +14,12 @@ const blocked = [
   ['event', 'bus'],
   ['micro', 'services'],
 ];
+const allowedManualModelTerms = new Set([
+  ['mis', 'tral'].join(''),
+  ['gem', 'ma'].join(''),
+  ['phi', '-3'].join(''),
+  ['phi', '3'].join(''),
+]);
 
 const ignoredDirectories = new Set(['node_modules', '.next', '.git']);
 const ignoredFiles = new Set([path.basename(__filename)]);
@@ -34,6 +40,11 @@ function isBlocked(text) {
   return blocked
     .map((parts) => parts.join('').toLowerCase())
     .filter((term) => lower.includes(term));
+}
+
+function hasAllowedManualModelTerm(text) {
+  const lower = text.toLowerCase();
+  return [...allowedManualModelTerms].some((term) => lower.includes(term));
 }
 
 function walk(directory, files = []) {
@@ -57,11 +68,30 @@ function walk(directory, files = []) {
 const violations = [];
 
 for (const filePath of walk(root)) {
-  const matches = isBlocked(fs.readFileSync(filePath, 'utf8'));
+  const contents = fs.readFileSync(filePath, 'utf8');
+  const matches = isBlocked(contents);
+  const relativeFile = path.relative(root, filePath);
+  const isAiConnector = relativeFile.startsWith(`backend${path.sep}ai${path.sep}`) && relativeFile.endsWith('.connector.js');
+  const isAiController = relativeFile === path.join('backend', 'controllers', 'ai.controller.js');
+  const isAiRoutes = relativeFile === path.join('backend', 'routes', 'ai.routes.js');
+  const isAiPage = relativeFile === path.join('frontend', 'pages', 'ai.js');
+  const isDoc = relativeFile.startsWith(`docs${path.sep}`);
+  const isReadme =
+    relativeFile === 'README.md' ||
+    relativeFile === path.join('backend', 'README.md') ||
+    relativeFile === path.join('frontend', 'README.md');
+  const allowedManualModelMention =
+    hasAllowedManualModelTerm(contents) && (isAiConnector || isAiController || isAiRoutes || isAiPage || isDoc || isReadme);
+
   if (matches.length) {
     violations.push({
-      file: path.relative(root, filePath),
+      file: relativeFile,
       matches,
+    });
+  } else if (hasAllowedManualModelTerm(contents) && !allowedManualModelMention) {
+    violations.push({
+      file: relativeFile,
+      matches: ['manual model term outside allowed files'],
     });
   }
 }

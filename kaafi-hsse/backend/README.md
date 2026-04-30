@@ -202,3 +202,16 @@ Content-Type: application/json
 ```
 
 Uses local Ollama with `deepseek-r1:7b`.
+
+### Manual AI Model Endpoints
+
+Requires `Authorization: Bearer <token>`.
+
+Each endpoint receives `{ "text": "..." }` and calls exactly one local Ollama model.
+
+```http
+POST /ai/deepseek
+POST /ai/mistral
+POST /ai/gemma
+POST /ai/phi3
+```

@@ -3,7 +3,15 @@ import Navbar from '../components/Navbar';
 import FormInput from '../components/FormInput';
 import { apiRequest } from '../services/api';
 
+const MODEL_OPTIONS = [
+  { label: 'DeepSeek (Risk)', value: 'deepseek', endpoint: '/ai/deepseek' },
+  { label: 'Mistral (JSA)', value: 'mistral', endpoint: '/ai/mistral' },
+  { label: 'Gemma (Docs)', value: 'gemma', endpoint: '/ai/gemma' },
+  { label: 'Phi-3 (Fast)', value: 'phi3', endpoint: '/ai/phi3' },
+];
+
 export default function AiPage() {
+  const [model, setModel] = useState('deepseek');
   const [text, setText] = useState('');
   const [result, setResult] = useState(null);
   const [message, setMessage] = useState('');
@@ -13,9 +21,10 @@ export default function AiPage() {
     setMessage('');
 
     try {
-      const data = await apiRequest('/ai/risk-analysis', {
+      const selected = MODEL_OPTIONS.find((option) => option.value === model) || MODEL_OPTIONS[0];
+      const data = await apiRequest(selected.endpoint, {
         method: 'POST',
-        body: JSON.stringify({ text }),
+        body: { text },
       });
       setResult(data);
       setText('');
@@ -28,12 +37,26 @@ export default function AiPage() {
     <main>
       <Navbar />
       <section className="mx-auto max-w-4xl px-6 py-8">
-        <h1 className="text-2xl font-bold text-slate-900">AI Risk Analysis</h1>
-        <p className="mt-2 text-sm text-slate-600">DeepSeek R1 via local Ollama.</p>
+        <h1 className="text-2xl font-bold text-slate-900">AI Assistant</h1>
+        <p className="mt-2 text-sm text-slate-600">Select one local model and send one request.</p>
 
         <form onSubmit={handleSubmit} className="mt-6 rounded-lg bg-white p-5 shadow-sm ring-1 ring-slate-200">
+          <label className="block">
+            <span className="text-sm font-medium text-slate-700">Model</span>
+            <select
+              value={model}
+              onChange={(event) => setModel(event.target.value)}
+              className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-slate-900 outline-none focus:border-slate-600"
+            >
+              {MODEL_OPTIONS.map((option) => (
+                <option key={option.value} value={option.value}>
+                  {option.label}
+                </option>
+              ))}
+            </select>
+          </label>
           <FormInput
-            label="Hazard or task text"
+            label="Input text"
             value={text}
             onChange={(event) => setText(event.target.value)}
             placeholder="working at height without harness"
@@ -45,14 +68,28 @@ export default function AiPage() {
         </form>
 
         {result ? (
-          <div className="mt-6 grid gap-4 md:grid-cols-3">
-            <ResultList title="Hazards" items={result.hazards} />
-            <ResultList title="Risks" items={result.risks} />
-            <ResultList title="Controls" items={result.controls} />
-          </div>
+          <ResultBox result={result} />
         ) : null}
       </section>
     </main>
+  );
+}
+
+function ResultBox({ result }) {
+  if (result.response) {
+    return (
+      <div className="mt-6 max-h-96 overflow-auto rounded-lg bg-white p-5 text-sm text-slate-800 shadow-sm ring-1 ring-slate-200">
+        <pre className="whitespace-pre-wrap font-sans">{result.response}</pre>
+      </div>
+    );
+  }
+
+  return (
+    <div className="mt-6 grid gap-4 md:grid-cols-3">
+      <ResultList title="Hazards" items={result.hazards} />
+      <ResultList title="Risks" items={result.risks} />
+      <ResultList title="Controls" items={result.controls} />
+    </div>
   );
 }
 

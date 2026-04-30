@@ -1,14 +1,18 @@
 # Step 7 - AI Risk Analysis
 
-This step adds one simple AI endpoint using DeepSeek R1 through local Ollama.
+This step adds simple AI endpoints through local Ollama. Each endpoint calls one model directly.
 
 ## Included endpoint
 
 | Method | Path | Purpose |
 | --- | --- | --- |
 | POST | `/ai/risk-analysis` | Analyze hazard text and return risks and controls |
+| POST | `/ai/deepseek` | Manual DeepSeek risk analysis |
+| POST | `/ai/mistral` | Manual Mistral text response |
+| POST | `/ai/gemma` | Manual Gemma text response |
+| POST | `/ai/phi3` | Manual Phi-3 text response |
 
-The endpoint requires a JWT bearer token.
+All endpoints require a JWT bearer token.
 
 ## Connector
 
@@ -50,8 +54,9 @@ If the AI response cannot be parsed as JSON, the connector returns:
 
 ## Boundaries
 
-- DeepSeek R1 only.
-- One connector.
-- One endpoint plus simple reuse by Risk creation.
+- Each endpoint calls one model directly.
+- Users manually select the model from the frontend.
+- No automatic model selection.
+- No response combining.
 - No extra AI architecture.
 - AI failure falls back immediately.
