@@ -214,4 +214,5 @@ POST /ai/deepseek
 POST /ai/mistral
 POST /ai/gemma
 POST /ai/phi3
+POST /ai/full-analysis
 ```

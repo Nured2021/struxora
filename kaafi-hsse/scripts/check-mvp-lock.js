@@ -72,6 +72,7 @@ for (const filePath of walk(root)) {
   const matches = isBlocked(contents);
   const relativeFile = path.relative(root, filePath);
   const isAiConnector = relativeFile.startsWith(`backend${path.sep}ai${path.sep}`) && relativeFile.endsWith('.connector.js');
+  const isPipelineService = relativeFile === path.join('backend', 'ai', 'pipeline.service.js');
   const isAiController = relativeFile === path.join('backend', 'controllers', 'ai.controller.js');
   const isAiRoutes = relativeFile === path.join('backend', 'routes', 'ai.routes.js');
   const isAiPage = relativeFile === path.join('frontend', 'pages', 'ai.js');
@@ -81,7 +82,8 @@ for (const filePath of walk(root)) {
     relativeFile === path.join('backend', 'README.md') ||
     relativeFile === path.join('frontend', 'README.md');
   const allowedManualModelMention =
-    hasAllowedManualModelTerm(contents) && (isAiConnector || isAiController || isAiRoutes || isAiPage || isDoc || isReadme);
+    hasAllowedManualModelTerm(contents) &&
+    (isAiConnector || isPipelineService || isAiController || isAiRoutes || isAiPage || isDoc || isReadme);
 
   if (matches.length) {
     violations.push({

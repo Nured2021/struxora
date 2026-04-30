@@ -1,6 +1,7 @@
 const deepseek = require('../ai/deepseek.connector');
 const gemma = require('../ai/gemma.connector');
 const mistral = require('../ai/mistral.connector');
+const pipeline = require('../ai/pipeline.service');
 const phi3 = require('../ai/phi3.connector');
 
 function requireText(req) {
@@ -56,10 +57,19 @@ async function phi3Manual(req, res, next) {
   }
 }
 
+async function fullAnalysis(req, res, next) {
+  try {
+    return res.json(await pipeline.runPipeline(requireText(req)));
+  } catch (error) {
+    return next(error);
+  }
+}
+
 module.exports = {
   riskAnalysis,
   deepseekManual,
   mistralManual,
   gemmaManual,
   phi3Manual,
+  fullAnalysis,
 };

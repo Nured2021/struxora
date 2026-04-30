@@ -11,6 +11,7 @@ This step adds simple AI endpoints through local Ollama. Each endpoint calls one
 | POST | `/ai/mistral` | Manual Mistral text response |
 | POST | `/ai/gemma` | Manual Gemma text response |
 | POST | `/ai/phi3` | Manual Phi-3 text response |
+| POST | `/ai/full-analysis` | Fixed step-by-step analysis using the local connectors |
 
 All endpoints require a JWT bearer token.
 
@@ -56,7 +57,8 @@ If the AI response cannot be parsed as JSON, the connector returns:
 
 - Each endpoint calls one model directly.
 - Users manually select the model from the frontend.
+- Full analysis runs a fixed sequence in `backend/ai/pipeline.service.js`.
 - No automatic model selection.
-- No response combining.
+- No hidden model choice.
 - No extra AI architecture.
 - AI failure falls back immediately.

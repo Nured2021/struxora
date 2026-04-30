@@ -15,14 +15,24 @@ export default function AiPage() {
   const [text, setText] = useState('');
   const [result, setResult] = useState(null);
   const [message, setMessage] = useState('');
+  const [loading, setLoading] = useState(false);
 
   async function handleSubmit(event) {
     event.preventDefault();
+    await sendRequest(false);
+  }
+
+  async function handleFullAnalysis() {
+    await sendRequest(true);
+  }
+
+  async function sendRequest(fullAnalysis) {
     setMessage('');
+    setLoading(true);
 
     try {
       const selected = MODEL_OPTIONS.find((option) => option.value === model) || MODEL_OPTIONS[0];
-      const data = await apiRequest(selected.endpoint, {
+      const data = await apiRequest(fullAnalysis ? '/ai/full-analysis' : selected.endpoint, {
         method: 'POST',
         body: { text },
       });
@@ -30,6 +40,8 @@ export default function AiPage() {
       setText('');
     } catch (error) {
       setMessage(error.message);
+    } finally {
+      setLoading(false);
     }
   }
 
@@ -63,7 +75,15 @@ export default function AiPage() {
           />
           {message ? <p className="mt-3 text-sm text-red-600">{message}</p> : null}
           <button className="mt-4 rounded-md bg-slate-900 px-4 py-2 text-sm font-medium text-white">
-            Analyze
+            {loading ? 'Running...' : 'Analyze'}
+          </button>
+          <button
+            type="button"
+            onClick={handleFullAnalysis}
+            disabled={loading}
+            className="ml-3 mt-4 rounded-md bg-blue-700 px-4 py-2 text-sm font-medium text-white disabled:opacity-60"
+          >
+            Run Full Analysis
           </button>
         </form>
 
@@ -76,6 +96,20 @@ export default function AiPage() {
 }
 
 function ResultBox({ result }) {
+  if (result.hazard || result.risk || result.jsa || result.ptw || result.document_check || result.summary) {
+    return (
+      <div className="mt-6 grid gap-4">
+        <Section title="Hazards" value={result.hazard} />
+        <Section title="Risks" value={result.risk} />
+        <Section title="Controls" value={result.controls} />
+        <Section title="JSA" value={result.jsa} />
+        <Section title="PTW" value={result.ptw} />
+        <Section title="Document Check" value={result.document_check} />
+        <Section title="Summary" value={result.summary} />
+      </div>
+    );
+  }
+
   if (result.response) {
     return (
       <div className="mt-6 max-h-96 overflow-auto rounded-lg bg-white p-5 text-sm text-slate-800 shadow-sm ring-1 ring-slate-200">
@@ -91,6 +125,22 @@ function ResultBox({ result }) {
       <ResultList title="Controls" items={result.controls} />
     </div>
   );
+}
+
+function Section({ title, value }) {
+  return (
+    <div className="max-h-72 overflow-auto rounded-lg bg-white p-5 text-sm text-slate-800 shadow-sm ring-1 ring-slate-200">
+      <h2 className="font-semibold text-slate-900">{title}</h2>
+      <pre className="mt-3 whitespace-pre-wrap font-sans">{formatValue(value)}</pre>
+    </div>
+  );
+}
+
+function formatValue(value) {
+  if (value === undefined || value === null || value === '') return 'No result returned.';
+  if (Array.isArray(value)) return value.length ? value.join('\n') : 'No result returned.';
+  if (typeof value === 'object') return JSON.stringify(value, null, 2);
+  return String(value);
 }
 
 function ResultList({ title, items = [] }) {

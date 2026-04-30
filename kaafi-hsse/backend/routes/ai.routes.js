@@ -11,5 +11,6 @@ router.post('/deepseek', aiController.deepseekManual);
 router.post('/mistral', aiController.mistralManual);
 router.post('/gemma', aiController.gemmaManual);
 router.post('/phi3', aiController.phi3Manual);
+router.post('/full-analysis', aiController.fullAnalysis);
 
 module.exports = router;

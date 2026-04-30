@@ -9,7 +9,7 @@ Simple Next.js + Tailwind CSS frontend for the KAAFI HSSE MVP.
 - `/jsa` - create and list JSA documents.
 - `/risk` - create a risk assessment and show `risk_score`.
 - `/ptw` - create and list permits to work.
-- `/ai` - manually select one local model endpoint and display the response.
+- `/ai` - manually select one local model endpoint or run the fixed full analysis.
 
 ## Setup
 
