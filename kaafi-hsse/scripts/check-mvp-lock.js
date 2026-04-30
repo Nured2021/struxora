@@ -5,7 +5,7 @@ const root = path.resolve(__dirname, '..');
 
 const blocked = [
   ['SAFE', 'WAY'],
-  ['orchestrat', 'or'],
+  ['orch', 'estr', 'ator'],
   ['AI', 'router'],
   ['multi', 'model', 'system'],
   ['workflow', 'engine'],
